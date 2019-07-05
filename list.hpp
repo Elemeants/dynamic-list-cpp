@@ -20,7 +20,7 @@
 //    pop_front()  : Deletes the first value
 //    forEach(std::function<void(int, T&)>)
 //             : Executes a function to every value
-//    map(std::function<Result(T&)>)
+//    map(std::function<Tresult(T&)>)
 //             : Maps the actual List into other List
 //    filter(std::function<bool(T&)> function)
 //            : Returns a list with the values filtered
@@ -75,6 +75,10 @@
 #ifndef LIST_H
 #define LIST_H
 
+#define loop_node(iterator_name) for(; iterator_name->next != NULL; iterator_name = iterator_name->next)
+#define while_node(iterator_name) while(iterator_name->next != NULL)
+#define loop_index_node(iter, lenght) for (unsigned int index = 0; iter != NULL && index < lenght; index++)
+
 template <typename T>
 struct Node {
     T data;
@@ -90,36 +94,27 @@ template <typename T>
 struct List
 {
 private:
-  size_t _len;
+  unsigned int lenght;
   struct Node<T> *start_node;
   struct Node<T> *get_start_node() {
     return this->start_node;
   }
+  struct Node<T> *get_last_node() {
+    Node<T> *iterator_node = this->get_start_node();
+    loop_node(iterator_node);
+    return iterator_node;
+  }
 public:
   // Constructor with specifict list size
-  List(unsigned int _size_nodes)
+  List(unsigned int _size_nodes) : lenght(0), start_node(NULL)
   {
-    this->_len = 0;
-    if (this->start_node) {
-      delete this->start_node;
-      this->start_node = NULL;
-    }
     for (int i = 0; i < _size_nodes; i++) this->push(T());
   }
 
   // Constructor with zero values
-  List()
-  {
-    this->_len = 0;
-    this->start_node = NULL;
-  }
-
+  List(): lenght(0), start_node(NULL) { }
   // Destructor of the structure
-  ~List()
-  {
-    this->_len = 0;
-    this->clear();
-  }
+  ~List() { this->clear(); }
 
   T operator[](unsigned int);
   int length() const;
@@ -130,16 +125,15 @@ public:
   T pop_back();
   void forEach(void (*function)(int, T&));
   List<T> filter(bool (*function)(T));
-  template <typename Result>
-  List<Result> map(Result (*function)(T));
+  template <typename Tresult>
+  List<Tresult> map(Tresult (*function)(T));
   T find(bool (*function)(T));
 };
 
-
 // Operator overloading to get/set values of the list
 template <typename T>
-T List<T>::operator[](unsigned int index){
-  if (this->_len > index) {
+T List<T>::operator[](unsigned int index) {
+  if (this->lenght > index) {
     Node<T> *iter = this->get_start_node();
     for (int i = 0; iter->next != NULL && i <= index; i++) {
       iter = iter->next;
@@ -152,7 +146,7 @@ T List<T>::operator[](unsigned int index){
 // Get the length of the list
 template <typename T>
 int List<T>::length() const {
-  return this->_len;
+  return this->lenght;
 }
 
 // Deletes all the values
@@ -163,22 +157,22 @@ List<T> * List<T>::clear() {
     this->start_node = iter->next;
     delete iter;
   }
-  this->_len = 0;
+  this->lenght = 0;
   return this;
 }
 
 // Adds a value into the front of the list
 template <typename T>
 List<T> *List<T>::push_front(T data) {
-  Node<T> *new_node = new Node<T>(data);
+  Node<T> *n_data = new Node<T>(data);
   if (this->start_node == NULL) {
-    this->start_node = new_node;
+    this->start_node = n_data;
   }
   else {
-    new_node->next = this->start_node;
-    this->start_node = new_node;
+    n_data->next = this->start_node;
+    this->start_node = n_data;
   }
-  this->_len++;
+  this->lenght++;
   return this;
 }
 
@@ -187,33 +181,29 @@ template <typename T>
 List<T> *List<T>::push(T data)
 {
   Node<T> *new_node = new Node<T>(data);
-  Node<T> *iter = this->get_start_node();
   if (this->start_node == NULL) {
     this->start_node = new_node;
   }
   else {
-    while (iter->next != NULL) {
-      iter = iter->next;
-    }
-    iter->next = new_node;
+    this->get_last_node()->next = new_node;
   }
-  this->_len++;
+  this->lenght++;
   return this;
 }
 
 // Deletes the last value
 template <typename T>
 T List<T>::pop_back() {
-  Node<T> *iter = this->get_start_node();
+  Node<T> *iterator = this->get_start_node();
   Node<T> *aux_node = this->get_start_node();
-  while (iter->next != NULL) {
-    aux_node = iter;
-    iter = iter->next;
+  while (iterator->next != NULL) {
+    aux_node = iterator;
+    iterator = iterator->next;
   }
-  this->_len--;
+  this->lenght--;
   aux_node->next = NULL;
-  T data = iter->data;
-  delete iter;
+  T data = iterator->data;
+  delete iterator;
   return data;
 }
 
@@ -224,7 +214,7 @@ T List<T>::pop()
   Node<T> *iter = this->get_start_node();
   this->start_node = iter->next;
   T data = iter->data;
-  this->_len--;
+  this->lenght--;
   delete iter;
   return data;
 }
@@ -234,7 +224,7 @@ template <typename T>
 void List<T>::forEach(void (*function)(int, T&))
 {
   Node<T> *iter = this->get_start_node();
-  for (int index = 0; iter != NULL && index < this->_len; index++)
+  loop_index_node(iterator, this->lenght)
   {
     function(index, iter->data);
     iter = iter->next;
@@ -243,14 +233,15 @@ void List<T>::forEach(void (*function)(int, T&))
 
 // Maps the actual List into other List
 template <typename T>
-template <typename Result>
-List<Result> List<T>::map(Result (*function)(T))
+template <typename Tresult>
+List<Tresult> List<T>::map(Tresult (*function)(T))
 {
-  List<Result> output = List<Result>();
+  List<Tresult> output = List<Tresult>();
   Node<T> *iter = this->get_start_node();
-  for (int index = 0; iter != NULL && index < this->_len; index++)
+  loop_index_node(iterator, this->lenght)
   {
-    Result data = function(iter->data);
+    const T iterator_data = iter->data;
+    Tresult data = function(iterator_data);
     output.push(data);
     iter = iter->next;
   }
@@ -263,12 +254,12 @@ List<T> List<T>::filter(bool (*function)(T))
 {
   List<T> output = List<T>();
   Node<T> *iter = this->get_start_node();
-  for (int index = 0; iter != NULL && index < this->_len; index++)
+  loop_index_node(iterator, this->lenght)
   {
-    const T indexVal = iter->data;
-    if (function(indexVal))
+    const T iterator_data = iter->data;
+    if (function(iterator_data))
     {
-      output.push(indexVal);
+      output.push(iterator_data);
     }
     iter = iter->next;
   }
@@ -278,12 +269,11 @@ List<T> List<T>::filter(bool (*function)(T))
 template <typename T>
 T List<T>::find(bool (*function)(T))
 {
-  return T();
   Node<T>* iterator = this->get_start_node();
-  for (int index = 0; iter != NULL && index < this->_len; index++)
+  loop_index_node(iterator, this->lenght)
   {
-    const T indexVal = iter->data;
-    if (function(indexVal)) { return indexVal; }
+    const T iterator_data = iter->data;
+    if (function(iterator_data)) { return iterator_data; }
     iter = iter->next;
   }
   return T();
