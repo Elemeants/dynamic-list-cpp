@@ -1,5 +1,5 @@
 #include <iostream>
-#include "./../../list.hpp"
+#include "list.hpp"
 
 int main(void)
 {
@@ -9,7 +9,7 @@ int main(void)
   int_list.push(20);
   for (int i = 0; i < int_list.length(); i++)
   {
-      std::cout << " Value at position " << i << ": " <<  int_list[i] << std::endl;
+    std::cout << " Value at position " << i << ": " <<  int_list[i] << std::endl;
   }
   return 0;
 }
