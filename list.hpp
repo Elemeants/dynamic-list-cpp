@@ -91,18 +91,18 @@ struct List
 {
 private:
   size_t _len;
-  struct Node<T> *arr_data;
-  struct Node<T> *GetIter() {
-    return this->arr_data;
+  struct Node<T> *start_node;
+  struct Node<T> *get_start_node() {
+    return this->start_node;
   }
 public:
   // Constructor with specifict list size
   List(unsigned int _size_nodes)
   {
     this->_len = 0;
-    if (this->arr_data) {
-      delete this->arr_data;
-      this->arr_data = NULL;
+    if (this->start_node) {
+      delete this->start_node;
+      this->start_node = NULL;
     }
     for (int i = 0; i < _size_nodes; i++) this->push(T());
   }
@@ -111,7 +111,7 @@ public:
   List()
   {
     this->_len = 0;
-    this->arr_data = NULL;
+    this->start_node = NULL;
   }
 
   // Destructor of the structure
@@ -132,6 +132,7 @@ public:
   List<T> filter(bool (*function)(T));
   template <typename Result>
   List<Result> map(Result (*function)(T));
+  T find(bool (*function)(T));
 };
 
 
@@ -139,7 +140,7 @@ public:
 template <typename T>
 T List<T>::operator[](unsigned int index){
   if (this->_len > index) {
-    Node<T> *iter = this->GetIter();
+    Node<T> *iter = this->get_start_node();
     for (int i = 0; iter->next != NULL && i <= index; i++) {
       iter = iter->next;
     }
@@ -157,9 +158,9 @@ int List<T>::length() const {
 // Deletes all the values
 template <typename T>
 List<T> * List<T>::clear() {
-  while (this->arr_data != NULL) {
-    Node<T> *iter = this->arr_data;
-    this->arr_data = iter->next;
+  while (this->start_node != NULL) {
+    Node<T> *iter = this->start_node;
+    this->start_node = iter->next;
     delete iter;
   }
   this->_len = 0;
@@ -170,12 +171,12 @@ List<T> * List<T>::clear() {
 template <typename T>
 List<T> *List<T>::push_front(T data) {
   Node<T> *new_node = new Node<T>(data);
-  if (this->arr_data == NULL) {
-    this->arr_data = new_node;
+  if (this->start_node == NULL) {
+    this->start_node = new_node;
   }
   else {
-    new_node->next = this->arr_data;
-    this->arr_data = new_node;
+    new_node->next = this->start_node;
+    this->start_node = new_node;
   }
   this->_len++;
   return this;
@@ -186,9 +187,9 @@ template <typename T>
 List<T> *List<T>::push(T data)
 {
   Node<T> *new_node = new Node<T>(data);
-  Node<T> *iter = this->GetIter();
-  if (this->arr_data == NULL) {
-    this->arr_data = new_node;
+  Node<T> *iter = this->get_start_node();
+  if (this->start_node == NULL) {
+    this->start_node = new_node;
   }
   else {
     while (iter->next != NULL) {
@@ -203,8 +204,8 @@ List<T> *List<T>::push(T data)
 // Deletes the last value
 template <typename T>
 T List<T>::pop_back() {
-  Node<T> *iter = this->GetIter();
-  Node<T> *aux_node = this->GetIter();
+  Node<T> *iter = this->get_start_node();
+  Node<T> *aux_node = this->get_start_node();
   while (iter->next != NULL) {
     aux_node = iter;
     iter = iter->next;
@@ -220,8 +221,8 @@ T List<T>::pop_back() {
 template <typename T>
 T List<T>::pop()
 {
-  Node<T> *iter = this->GetIter();
-  this->arr_data = iter->next;
+  Node<T> *iter = this->get_start_node();
+  this->start_node = iter->next;
   T data = iter->data;
   this->_len--;
   delete iter;
@@ -232,7 +233,7 @@ T List<T>::pop()
 template <typename T>
 void List<T>::forEach(void (*function)(int, T&))
 {
-  Node<T> *iter = this->GetIter();
+  Node<T> *iter = this->get_start_node();
   for (int index = 0; iter != NULL && index < this->_len; index++)
   {
     function(index, iter->data);
@@ -246,7 +247,7 @@ template <typename Result>
 List<Result> List<T>::map(Result (*function)(T))
 {
   List<Result> output = List<Result>();
-  Node<T> *iter = this->GetIter();
+  Node<T> *iter = this->get_start_node();
   for (int index = 0; iter != NULL && index < this->_len; index++)
   {
     Result data = function(iter->data);
@@ -261,7 +262,7 @@ template <typename T>
 List<T> List<T>::filter(bool (*function)(T))
 {
   List<T> output = List<T>();
-  Node<T> *iter = this->GetIter();
+  Node<T> *iter = this->get_start_node();
   for (int index = 0; iter != NULL && index < this->_len; index++)
   {
     const T indexVal = iter->data;
@@ -272,6 +273,20 @@ List<T> List<T>::filter(bool (*function)(T))
     iter = iter->next;
   }
   return output;
+}
+
+template <typename T>
+T List<T>::find(bool (*function)(T))
+{
+  return T();
+  Node<T>* iterator = this->get_start_node();
+  for (int index = 0; iter != NULL && index < this->_len; index++)
+  {
+    const T indexVal = iter->data;
+    if (function(indexVal)) { return indexVal; }
+    iter = iter->next;
+  }
+  return T();
 }
 
 #endif
