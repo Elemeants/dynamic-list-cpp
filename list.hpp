@@ -224,7 +224,7 @@ template <typename T>
 void List<T>::forEach(void (*function)(int, T&))
 {
   Node<T> *iter = this->get_start_node();
-  loop_index_node(iterator, this->lenght)
+  loop_index_node(iter, this->lenght)
   {
     function(index, iter->data);
     iter = iter->next;
@@ -238,7 +238,7 @@ List<Tresult> List<T>::map(Tresult (*function)(T))
 {
   List<Tresult> output = List<Tresult>();
   Node<T> *iter = this->get_start_node();
-  loop_index_node(iterator, this->lenght)
+  loop_index_node(iter, this->lenght)
   {
     const T iterator_data = iter->data;
     Tresult data = function(iterator_data);
@@ -254,7 +254,7 @@ List<T> List<T>::filter(bool (*function)(T))
 {
   List<T> output = List<T>();
   Node<T> *iter = this->get_start_node();
-  loop_index_node(iterator, this->lenght)
+  loop_index_node(iter, this->lenght)
   {
     const T iterator_data = iter->data;
     if (function(iterator_data))
@@ -272,9 +272,9 @@ T List<T>::find(bool (*function)(T))
   Node<T>* iterator = this->get_start_node();
   loop_index_node(iterator, this->lenght)
   {
-    const T iterator_data = iter->data;
+    const T iterator_data = iterator->data;
     if (function(iterator_data)) { return iterator_data; }
-    iter = iter->next;
+    iterator = iterator->next;
   }
   return T();
 }
