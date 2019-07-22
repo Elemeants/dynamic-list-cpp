@@ -179,10 +179,11 @@ T List<T>::pop_back()
   {
     new_data_pos[i] = old_data_pos[i];
   }
+  T data_pop = old_data_pos[this->lenght - 1];
   delete[] old_data_pos;
   this->data = new_data_pos;
   this->lenght--;
-  return data;
+  return data_pop;
 }
 
 // Deletes the firsh value
@@ -195,10 +196,11 @@ T List<T>::pop()
   {
     new_data_pos[i] = old_data_pos[i + 1];
   }
+  T data_pop = old_data_pos[0];
   delete[] old_data_pos;
   this->data = new_data_pos;
   this->lenght--;
-  return data;
+  return data_pop;
 }
 
 // Executes a function to every value
@@ -207,7 +209,7 @@ void List<T>::forEach(void (*function)(int, T &))
 {
   for (int index = 0; index < this->lenght; index++)
   {
-    const T val = this->data[index];
+    T val = this->data[index];
     function(index, val);
   }
 }
