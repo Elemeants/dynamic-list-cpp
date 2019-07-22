@@ -128,12 +128,14 @@ public:
   template <typename Tresult>
   List<Tresult> map(Tresult (*function)(T));
   T find(bool (*function)(T));
+  T first();
+  T last();
 };
 
 // Operator overloading to get/set values of the list
 template <typename T>
 T List<T>::operator[](unsigned int index) {
-  if (this->lenght > index) {
+  if (this->lenght > index && index >= 0) {
     Node<T> *iter = this->get_start_node();
     for (int i = 0; iter->next != NULL && i <= index; i++) {
       iter = iter->next;
@@ -278,5 +280,13 @@ T List<T>::find(bool (*function)(T))
   }
   return T();
 }
+
+template <typename T>
+T first() {
+  return (*this)[0];
+}
+
+template <typename T>
+T last() { return (*this)[this->lenght - 1]; }
 
 #endif
