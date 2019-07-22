@@ -137,7 +137,7 @@ template <typename T>
 T List<T>::operator[](unsigned int index) {
   if (this->lenght > index && index >= 0) {
     Node<T> *iter = this->get_start_node();
-    for (int i = 0; iter->next != NULL && i <= index; i++) {
+    for (int i = 0; iter->next != NULL && i < index; i++) {
       iter = iter->next;
     }
     return iter->data;
@@ -282,11 +282,11 @@ T List<T>::find(bool (*function)(T))
 }
 
 template <typename T>
-T first() {
+T List<T>::first() {
   return (*this)[0];
 }
 
 template <typename T>
-T last() { return (*this)[this->lenght - 1]; }
+T List<T>::last() { return (*this)[this->lenght - 1]; }
 
 #endif
