@@ -106,6 +106,8 @@ public:
   template <typename Tresult>
   List<Tresult> map(Tresult (*function)(T));
   T find(bool (*function)(T));
+  T first();
+  T last();
 };
 
 // Operator overloading to get/set values of the list
@@ -258,5 +260,13 @@ T List<T>::find(bool (*function)(T))
   }
   return T();
 }
+
+template <typename T>
+T List<T>::first() {
+  return (*this)[0];
+}
+
+template <typename T>
+T List<T>::last() { return (*this)[this->lenght - 1]; }
 
 #endif
